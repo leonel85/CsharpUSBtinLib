@@ -78,8 +78,7 @@ namespace CsharpUSBTinLib
             while (true)
             {
                 rawmsg = Q_Receive.Read();
-
-                //TODO: implement ancillary function to split CAN frames
+                
                 SplitCANFrames(rawmsg, ref msgBuff);
                 
                 foreach (string msg in msgBuff) { 
