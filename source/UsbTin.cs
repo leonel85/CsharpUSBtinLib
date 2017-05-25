@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO.Ports;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace CsharpUSBTinLib
 {
@@ -18,6 +19,7 @@ namespace CsharpUSBTinLib
         SerialPort serialPort;
         String firmwareVersion;
         String hardwareVersion;
+        List<string> msgBuff; //New string list for multiple message buffering
 
 
         public UsbTin()
@@ -28,6 +30,7 @@ namespace CsharpUSBTinLib
             Th_Receive.IsBackground = true;
 
 
+            msgBuff = new List<string>();
             Q_Send = new GenericQueue<CANMessage>();
             Th_Send = new Thread(ThD_Send);
             Th_Send.IsBackground = true;
@@ -56,7 +59,7 @@ namespace CsharpUSBTinLib
                 result = autoEvent.WaitOne(100);
                 if (result)
                 {
-                    RaiseMessage("Writed \t \t msg = " + msg.ToString());
+                    RaiseMessage("Written \t \t msg = " + msg.ToString());
                 }
                 else
                 {
@@ -71,24 +74,45 @@ namespace CsharpUSBTinLib
         /// <param name="o"></param>
         private void ThD_Receive(object o)
         {
-            string msg;
+            string rawmsg;
             while (true)
             {
-                msg = Q_Receive.Read();
-                char cmd = msg[0];
+                rawmsg = Q_Receive.Read();
+                
+                SplitCANFrames(rawmsg, ref msgBuff);
+                
+                foreach (string msg in msgBuff) { 
 
-                RaiseMessage("NEW MSG \t " + msg);
+                    char cmd = msg[0];
+          
+                    RaiseMessage("NEW MSG \t " + msg);
 
-                if (msg.EndsWith("\r") && (cmd == 't' || cmd == 'T' || cmd == 'r' || cmd == 'R'))
-                    RaiseCANMessage(new CANMessage(msg));
-                else
-                {
-                    if (msg == "z\r" || msg == "Z\r" || msg == "t\r" || msg == "T\r")
-                        autoEvent.Set();
+                    if (msg.EndsWith("\r") && (cmd == 't' || cmd == 'T' || cmd == 'r' || cmd == 'R'))
+                        RaiseCANMessage(new CANMessage(msg));
                     else
-                        RaiseMessage("Unknown msg: \t" + msg);
+                    {
+                        if (msg == "z\r" || msg == "Z\r" || msg == "t\r" || msg == "T\r")
+                            autoEvent.Set();
+                        else
+                            RaiseMessage("Unknown msg: \t" + msg);
+                    }
                 }
+
+                msgBuff.Clear();
             }
+        }
+
+        private void SplitCANFrames(string rawmsg, ref List<string> msgBuff)
+        {
+            string patron = @"[0-9a-zA-Z]*\r";
+            
+            foreach (Match m in Regex.Matches(rawmsg, patron))
+            {
+                msgBuff.Add(m.ToString());
+                
+            }
+
+            return;
         }
 
         #endregion
@@ -135,6 +159,7 @@ namespace CsharpUSBTinLib
                 serialPort.StopBits = StopBits.One;
                 serialPort.Parity = Parity.None;
                 serialPort.ReadTimeout = 1000;
+                serialPort.ReadBufferSize = 8192; //adjust this to your application needs
 
                 System.Threading.Thread.Sleep(500);
 
