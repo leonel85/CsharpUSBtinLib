@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29709.97
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CsharpUSBTinLib", "CsharpUSBTinLib.csproj", "{4691E5C5-2A07-4D80-ABFC-7982DE1F2070}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4691E5C5-2A07-4D80-ABFC-7982DE1F2070}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4691E5C5-2A07-4D80-ABFC-7982DE1F2070}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4691E5C5-2A07-4D80-ABFC-7982DE1F2070}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4691E5C5-2A07-4D80-ABFC-7982DE1F2070}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C52A432E-88CD-4727-AD3F-FE463A283233}
+	EndGlobalSection
+EndGlobal

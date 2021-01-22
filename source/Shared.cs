@@ -11,7 +11,8 @@ namespace CsharpUSBTinLib
         {
             ACTIVE = 0,
             LISTENONLY = 1,
-            LOOPBACK = 2
-        }
+            LOOPBACK = 2,
+            LOOPBACK_LISTENONLY = 3
     }
+  }
 }
