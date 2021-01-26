@@ -14,11 +14,12 @@ namespace CsharpUSBTinLib {
     AutoResetEvent autoEvent;
     object SyncPort = new object();
 
-    SerialPort serialPort;
+    SerialPort serialPort = new SerialPort();
     String firmwareVersion;
     String hardwareVersion;
     List<string> msgBuff; //New string list for multiple message buffering
-
+    public const int DEFAULT_BAUD = 115200;
+    public const int DEFAULT_BUFFER = 8192;
 
     public UsbTin() {
       autoEvent = new AutoResetEvent(false);
@@ -138,17 +139,15 @@ namespace CsharpUSBTinLib {
     /// <param name="baudRate">BAUD rate</param>
     /// <param name="readBufferSize">Size of the read buffer in bytes</param>
     /// <returns>True if successful</returns>
-    public bool Connect(String portName, int baudRate = 115200, int readBufferSize = 8192) {
-      if (Connected) {
+    public bool Connect(String portName, int baudRate = DEFAULT_BAUD, int readBufferSize = DEFAULT_BUFFER) {
+      if (Connected || serialPort.IsOpen) {
         Disconnect();
       }
 
       Connected = false;
       try {
-        // create serial port object
-        serialPort = new SerialPort(portName);
-
         // initialize
+        serialPort.PortName = portName;
         serialPort.BaudRate = baudRate;
         serialPort.DataBits = 8;
         serialPort.StopBits = StopBits.One;
@@ -164,12 +163,6 @@ namespace CsharpUSBTinLib {
         serialPort.Write("\rC\r");
 
         Thread.Sleep(100);
-
-        //(SerialPort.PURGE_RXCLEAR | SerialPort.PURGE_TXCLEAR);
-        //•PURGE_TXABORT  immediately stops all write operations even if they are not finished;
-        //•PURGE_RXABORT  immediately stops all read operations even if they are not finished;
-        //•PURGE_TXCLEAR  clears the out -queue in the driver;
-        //•PURGE_RXCLEAR  clears the in -queue in the driver.
 
         serialPort.DiscardInBuffer();
         serialPort.DiscardOutBuffer();
@@ -223,7 +216,9 @@ namespace CsharpUSBTinLib {
     public void Disconnect() {
 
       try {
-        serialPort.Close();
+        if (serialPort.IsOpen) {
+          serialPort.Close();
+        }
       }
       catch (Exception e) {
         throw new UsbTinException(e.Message);
@@ -271,22 +266,22 @@ namespace CsharpUSBTinLib {
     public void OpenCANChannel(int busspeed, Shared.OpenMode mode) {
       try {
         // set baudrate
-        char baudCh = ' ';
+        char speed = ' ';
         switch (busspeed) {
-          case 10000: baudCh = '0'; break;
-          case 20000: baudCh = '1'; break;
-          case 50000: baudCh = '2'; break;
-          case 100000: baudCh = '3'; break;
-          case 125000: baudCh = '4'; break;
-          case 250000: baudCh = '5'; break;
-          case 500000: baudCh = '6'; break;
-          case 800000: baudCh = '7'; break;
-          case 1000000: baudCh = '8'; break;
+          case 10000: speed = '0'; break;
+          case 20000: speed = '1'; break;
+          case 50000: speed = '2'; break;
+          case 100000: speed = '3'; break;
+          case 125000: speed = '4'; break;
+          case 250000: speed = '5'; break;
+          case 500000: speed = '6'; break;
+          case 800000: speed = '7'; break;
+          case 1000000: speed = '8'; break;
         }
 
-        if (baudCh != ' ') {
+        if (speed != ' ') {
           // use preset baudrate               
-          Transmit("S" + baudCh);
+          Transmit("S" + speed);
         }
         else {
           // calculate baudrate register settings
