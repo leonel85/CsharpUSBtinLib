@@ -75,19 +75,28 @@ namespace CsharpUSBTinLib
             while (true)
             {
                 msg = Q_Receive.Read();
-                char cmd = msg[0];
+                string [] msgs = msg.Split('\r');
 
-                RaiseMessage("NEW MSG \t " + msg);
-
-                if (msg.EndsWith("\r") && (cmd == 't' || cmd == 'T' || cmd == 'r' || cmd == 'R'))
-                    RaiseCANMessage(new CANMessage(msg));
-                else
+                foreach (string tk in msgs)
                 {
-                    if (msg == "z\r" || msg == "Z\r" || msg == "t\r" || msg == "T\r")
-                        autoEvent.Set();
+                    string msgtmp;
+                    msgtmp = tk + '\r';
+
+                    char cmd = msgtmp[0];
+
+                    RaiseMessage("NEW MSG \t " + msgtmp);
+
+                    if (msgtmp.EndsWith("\r") && (cmd == 't' || cmd == 'T' || cmd == 'r' || cmd == 'R'))
+                        RaiseCANMessage(new CANMessage(msgtmp));
                     else
-                        RaiseMessage("Unknown msg: \t" + msg);
+                    {
+                        if (msgtmp == "z\r" || msgtmp == "Z\r" || msgtmp == "t\r" || msgtmp == "T\r")
+                            autoEvent.Set();
+                        else
+                            RaiseMessage("Unknown msg: \t" + msgtmp);
+                    }
                 }
+
             }
         }
 
