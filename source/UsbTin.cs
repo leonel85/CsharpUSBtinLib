@@ -191,13 +191,6 @@ namespace CsharpUSBTinLib {
       catch (Exception e) {
         throw new UsbTinException("Connect \t" + e.Message);
       }
-      /*TODO catch   ( SerialPor SerialPortException e) {
-          throw new USBtinException(e.getPortName() + " - " + e.getExceptionType());
-      } catch (SerialPortTimeoutException e) {
-          throw new USBtinException("Timeout! USBtin doesn't answer. Right port?");
-      } catch (InterruptedException e) {
-          throw new USBtinException(e);
-      } */
       return Connected;
     }
 
